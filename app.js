@@ -190,20 +190,20 @@ function loadSavedSetsFromStorage() {
     } else {
         // Default base library songs
         libraryTracks = [
-            { title: "Gold Digger", artist: "Acoustic Band", duration: 185, capo: "" },
-            { title: "The Fog", artist: "Instrumental", duration: 210, capo: "" },
-            { title: "Agave Americana", artist: "Folk Trio", duration: 165, capo: "" },
-            { title: "Wagon Wheel (cover)", artist: "Old Crow", duration: 245, capo: "" },
-            { title: "Leave It All Behind", artist: "Acoustic", duration: 220, capo: "" },
-            { title: "The Witch", artist: "Bluegrass", duration: 195, capo: "" },
-            { title: "The Fortunate Ones", artist: "Indie", duration: 202, capo: "" },
-            { title: "Will the Circle Be Unbroken (cover)", artist: "Trad", duration: 280, capo: "" },
-            { title: "A New Rider in Town", artist: "Country", duration: 175, capo: "" },
-            { title: "The Boy Who Wouldn't Hoe Corn (cover)", artist: "Dan Tyminski", duration: 260, capo: "" },
-            { title: "Bloody Sunrise", artist: "Country Ballad", duration: 230, capo: "" },
-            { title: "The Cowboy's Soul", artist: "Western", duration: 198, capo: "" },
-            { title: "This Train Is Bound For Glory (cover)", artist: "Woody Guthrie", duration: 245, capo: "" },
-            { title: "A Man of a Constant Sorrow (cover)", artist: "Soggy Bottom Boys", duration: 250, capo: "" }
+            { title: "Gold Digger", duration: 185, capo: "" },
+            { title: "The Fog", duration: 210, capo: "" },
+            { title: "Agave Americana", duration: 165, capo: "" },
+            { title: "Wagon Wheel (cover)", duration: 245, capo: "" },
+            { title: "Leave It All Behind", duration: 220, capo: "" },
+            { title: "The Witch", duration: 195, capo: "" },
+            { title: "The Fortunate Ones", duration: 202, capo: "" },
+            { title: "Will the Circle Be Unbroken (cover)", duration: 280, capo: "" },
+            { title: "A New Rider in Town", duration: 175, capo: "" },
+            { title: "The Boy Who Wouldn't Hoe Corn (cover)", duration: 260, capo: "" },
+            { title: "Bloody Sunrise", duration: 230, capo: "" },
+            { title: "The Cowboy's Soul", duration: 198, capo: "" },
+            { title: "This Train Is Bound For Glory (cover)", duration: 245, capo: "" },
+            { title: "A Man of a Constant Sorrow (cover)", duration: 250, capo: "" }
         ];
         saveLibraryToStorage();
     }
@@ -249,13 +249,12 @@ function showToast(message, type = 'success') {
 
 // --- Library Management ---
 
-function addTrackToLibrary(title, artist, duration, capo) {
+function addTrackToLibrary(title, duration, capo) {
     const cleanTitle = title.trim();
     const exists = libraryTracks.some(t => t.title.toLowerCase() === cleanTitle.toLowerCase());
     if (!exists) {
         libraryTracks.push({
             title: cleanTitle,
-            artist: artist.trim() || "Artiste inconnu",
             duration: duration,
             capo: capo ? capo.trim() : ""
         });
@@ -283,8 +282,7 @@ function renderLibrary(filterQuery = "") {
     container.innerHTML = "";
     
     const filtered = libraryTracks.filter(t => 
-        t.title.toLowerCase().includes(filterQuery.toLowerCase()) ||
-        t.artist.toLowerCase().includes(filterQuery.toLowerCase())
+        t.title.toLowerCase().includes(filterQuery.toLowerCase())
     );
     
     if (filtered.length === 0) {
@@ -308,7 +306,6 @@ function renderLibrary(filterQuery = "") {
             e.dataTransfer.setData('application/json', JSON.stringify({
                 source: 'library',
                 title: track.title,
-                artist: track.artist,
                 duration: track.duration,
                 capo: track.capo
             }));
@@ -327,7 +324,7 @@ function renderLibrary(filterQuery = "") {
         item.innerHTML = `
             <div class="set-item-info" style="flex: 1; min-width: 0; pointer-events: none;">
                 <span class="set-item-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${escapeHtml(track.title)}">${escapeHtml(track.title)}</span>
-                <span class="set-item-meta">${escapeHtml(track.artist)} • ${formatTrackDuration(track.duration)}${capoBadge}</span>
+                <span class="set-item-meta">${formatTrackDuration(track.duration)}${capoBadge}</span>
             </div>
             <div style="display: flex; gap: 0.25rem;">
                 <button class="action-btn add-to-set-from-lib-btn" data-title="${escapeHtml(track.title)}" title="Ajouter à la setlist" style="color: var(--success);">
@@ -344,11 +341,10 @@ function renderLibrary(filterQuery = "") {
 
 // --- Active Setlist Logic ---
 
-function addTrackToSetlist(title, artist, duration, capo, atIndex = null) {
+function addTrackToSetlist(title, duration, capo, atIndex = null) {
     const newTrack = {
         id: 'track_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         title: title,
-        artist: artist || "Artiste inconnu",
         duration: duration,
         capo: capo ? capo.toString().trim() : "",
         enabled: true
@@ -443,7 +439,6 @@ function updateTrackInline(id, fields) {
     const track = currentSet.tracks.find(t => t.id === id);
     if (track) {
         if (fields.title) track.title = fields.title.trim();
-        if (fields.artist !== undefined) track.artist = fields.artist.trim() || "Artiste inconnu";
         if (fields.capo !== undefined) track.capo = fields.capo.trim();
         if (fields.durationStr) {
             const secs = parseTimeToSeconds(fields.durationStr);
@@ -549,7 +544,7 @@ function renderTracklist() {
                 <div class="separator-line" style="border-top-color: rgba(245, 158, 11, 0.2);"></div>
                 <div class="track-actions">
                     <button class="action-btn delete delete-track-btn" data-id="${track.id}" title="Supprimer">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2 2v2"></path></svg>
                     </button>
                 </div>
             `;
@@ -580,7 +575,6 @@ function renderTracklist() {
             </div>
             <div class="track-details" style="gap: 0.35rem;">
                 <input type="text" id="edit-title-${track.id}" class="track-edit-input" value="${escapeHtml(track.title)}" placeholder="Titre">
-                <input type="text" id="edit-artist-${track.id}" class="track-edit-input" value="${escapeHtml(track.artist)}" placeholder="Artiste">
                 <div style="display: flex; gap: 0.5rem;">
                     <input type="text" id="edit-duration-${track.id}" class="track-edit-input" value="${formatTrackDuration(track.duration)}" placeholder="Durée (ex: 3:30)" style="flex: 1;">
                     <input type="text" id="edit-capo-${track.id}" class="track-edit-input" value="${escapeHtml(track.capo)}" placeholder="Capo (ex: 2)" style="flex: 0.8;">
@@ -613,7 +607,6 @@ function renderTracklist() {
                     <span>${escapeHtml(track.title)}</span>
                     ${capoBadge}
                 </div>
-                <div class="track-artist" title="${escapeHtml(track.artist)}">${escapeHtml(track.artist)}</div>
             </div>
             
             <div class="track-duration-badge">
@@ -731,7 +724,7 @@ function setupDragAndDropEvents(el) {
         
         if (data.source === 'library') {
             // Dragged from Library -> Insert in Setlist
-            addTrackToSetlist(data.title, data.artist, data.duration, data.capo, toIndex);
+            addTrackToSetlist(data.title, data.duration, data.capo, toIndex);
         } else if (data.source === 'setlist') {
             // Dragged within Setlist -> Reorder
             const fromIndex = parseInt(data.index, 10);
@@ -767,7 +760,6 @@ function initEventListeners() {
     form.addEventListener("submit", (e) => {
         e.preventDefault();
         const titleVal = document.getElementById("track-title").value;
-        const artistVal = document.getElementById("track-artist").value;
         
         // Read minutes & seconds dropdowns
         const mins = parseInt(document.getElementById("track-duration-min").value, 10) || 0;
@@ -776,7 +768,7 @@ function initEventListeners() {
         
         const capoVal = document.getElementById("track-capo").value;
         
-        addTrackToLibrary(titleVal, artistVal, durationSeconds, capoVal);
+        addTrackToLibrary(titleVal, durationSeconds, capoVal);
         form.reset();
         document.getElementById("track-title").focus();
     });
@@ -803,7 +795,6 @@ function initEventListeners() {
         e.preventDefault();
     });
     tracklistContainer.addEventListener("drop", (e) => {
-        // If target is container or empty list, append to the end
         if (e.target === tracklistContainer || tracklistContainer.querySelector('.empty-state')) {
             let data = {};
             try {
@@ -811,7 +802,7 @@ function initEventListeners() {
             } catch(err) { return; }
             
             if (data.source === 'library') {
-                addTrackToSetlist(data.title, data.artist, data.duration, data.capo);
+                addTrackToSetlist(data.title, data.duration, data.capo);
             }
         }
     });
@@ -827,7 +818,7 @@ function initEventListeners() {
             const songName = addBtn.dataset.title;
             const song = libraryTracks.find(t => t.title.toLowerCase() === songName.toLowerCase());
             if (song) {
-                addTrackToSetlist(song.title, song.artist, song.duration, song.capo);
+                addTrackToSetlist(song.title, song.duration, song.capo);
             }
         } else if (deleteBtn) {
             const songName = deleteBtn.dataset.title;
@@ -857,14 +848,12 @@ function initEventListeners() {
         } else if (saveEditBtn) {
             const id = saveEditBtn.dataset.id;
             const newTitle = document.getElementById(`edit-title-${id}`).value;
-            const newArtist = document.getElementById(`edit-artist-${id}`).value;
             const newDuration = document.getElementById(`edit-duration-${id}`).value;
             const newCapo = document.getElementById(`edit-capo-${id}`).value;
             
             editingTrackId = null;
             updateTrackInline(id, {
                 title: newTitle,
-                artist: newArtist,
                 durationStr: newDuration,
                 capo: newCapo
             });
@@ -979,31 +968,31 @@ function loadDemoData() {
     // NOTE: Guitar tuning item is placed BEFORE "A Man of a Constant Sorrow"
     // Banjo tunings are placed BEFORE their respective songs so they render next to them!
     currentSet.tracks = [
-        { id: "pdf_1", title: "Gold Digger", artist: "Acoustic Band", duration: 185, capo: "", enabled: true },
-        { id: "pdf_2", title: "The Fog", artist: "Instrumental", duration: 210, capo: "", enabled: true },
-        { id: "pdf_3", title: "Agave Americana", artist: "Folk Trio", duration: 165, capo: "", enabled: true },
-        { id: "pdf_4", title: "Wagon Wheel (cover)", artist: "Old Crow", duration: 245, capo: "", enabled: true },
-        { id: "pdf_5", title: "Leave It All Behind", artist: "Acoustic", duration: 220, capo: "", enabled: true },
+        { id: "pdf_1", title: "Gold Digger", duration: 185, capo: "", enabled: true },
+        { id: "pdf_2", title: "The Fog", duration: 210, capo: "", enabled: true },
+        { id: "pdf_3", title: "Agave Americana", duration: 165, capo: "", enabled: true },
+        { id: "pdf_4", title: "Wagon Wheel (cover)", duration: 245, capo: "", enabled: true },
+        { id: "pdf_5", title: "Leave It All Behind", duration: 220, capo: "", enabled: true },
         { id: "pdf_tuning_1", isTuning: true, instrument: "banjo", enabled: true },
-        { id: "pdf_6", title: "The Witch", artist: "Bluegrass", duration: 195, capo: "", enabled: true },
+        { id: "pdf_6", title: "The Witch", duration: 195, capo: "", enabled: true },
         { id: "pdf_tuning_2", isTuning: true, instrument: "banjo", enabled: true },
-        { id: "pdf_7", title: "The Fortunate Ones", artist: "Indie", duration: 202, capo: "", enabled: true },
-        { id: "pdf_8", title: "Will the Circle Be Unbroken (cover)", artist: "Trad", duration: 280, capo: "", enabled: true },
-        { id: "pdf_9", title: "A New Rider in Town", artist: "Country", duration: 175, capo: "", enabled: true },
-        { id: "pdf_10", title: "The Boy Who Wouldn't Hoe Corn (cover)", artist: "Dan Tyminski", duration: 260, capo: "", enabled: true },
+        { id: "pdf_7", title: "The Fortunate Ones", duration: 202, capo: "", enabled: true },
+        { id: "pdf_8", title: "Will the Circle Be Unbroken (cover)", duration: 280, capo: "", enabled: true },
+        { id: "pdf_9", title: "A New Rider in Town", duration: 175, capo: "", enabled: true },
+        { id: "pdf_10", title: "The Boy Who Wouldn't Hoe Corn (cover)", duration: 260, capo: "", enabled: true },
         { id: "pdf_tuning_3", isTuning: true, instrument: "banjo", enabled: true },
-        { id: "pdf_11", title: "Bloody Sunrise", artist: "Country Ballad", duration: 230, capo: "", enabled: true },
-        { id: "pdf_12", title: "The Cowboy's Soul", artist: "Western", duration: 198, capo: "", enabled: true },
-        { id: "pdf_13", title: "This Train Is Bound For Glory (cover)", artist: "Woody Guthrie", duration: 245, capo: "", enabled: true },
+        { id: "pdf_11", title: "Bloody Sunrise", duration: 230, capo: "", enabled: true },
+        { id: "pdf_12", title: "The Cowboy's Soul", duration: 198, capo: "", enabled: true },
+        { id: "pdf_13", title: "This Train Is Bound For Glory (cover)", duration: 245, capo: "", enabled: true },
         { id: "pdf_14", isSeparator: true, enabled: true },
         { id: "pdf_tuning_4", isTuning: true, instrument: "guitar", enabled: true },
-        { id: "pdf_15", title: "A Man of a Constant Sorrow (cover)", artist: "Soggy Bottom Boys", duration: 250, capo: "", enabled: true }
+        { id: "pdf_15", title: "A Man of a Constant Sorrow (cover)", duration: 250, capo: "", enabled: true }
     ];
     
-    // Add all to library
+    // Add all to library (avoiding duplicate names)
     currentSet.tracks.forEach(track => {
         if (!track.isSeparator && !track.isTuning) {
-            addTrackToLibrary(track.title, track.artist, track.duration, track.capo);
+            addTrackToLibrary(track.title, track.duration, track.capo);
         }
     });
     
@@ -1052,7 +1041,7 @@ function loadSavedSet(id) {
         
         currentSet.tracks.forEach(t => {
             if (!t.isSeparator && !t.isTuning) {
-                addTrackToLibrary(t.title, t.artist, t.duration, t.capo);
+                addTrackToLibrary(t.title, t.duration, t.capo);
             }
         });
         
@@ -1076,7 +1065,6 @@ function generateAndPrintPDF() {
     
     currentSet.tracks.forEach(track => {
         if (track.isSeparator) {
-            // Render any accumulated instruments before drawing divider
             if (pendingInstruments.length > 0) {
                 pendingInstruments.forEach(inst => {
                     html += `<div class="print-item-row tuning-row" style="min-height: 40px; margin: 4px 0;">`;
@@ -1091,10 +1079,8 @@ function generateAndPrintPDF() {
             }
             html += `<div class="print-divider-line"></div>`;
         } else if (track.isTuning && track.enabled) {
-            // Accumulate tuning instruments to render next to the NEXT song
             pendingInstruments.push(track.instrument);
         } else if (track.enabled) {
-            // Song row
             let leftInstrumentsHtml = "";
             let rightInstrumentsHtml = "";
             
@@ -1106,7 +1092,6 @@ function generateAndPrintPDF() {
                 }
             });
             
-            // Clear pending
             pendingInstruments = [];
             
             html += `<div class="print-item-row">`;
@@ -1123,7 +1108,6 @@ function generateAndPrintPDF() {
         }
     });
     
-    // Draw any remaining tuning items at the very end
     if (pendingInstruments.length > 0) {
         pendingInstruments.forEach(inst => {
             html += `<div class="print-item-row tuning-row" style="min-height: 40px; margin: 4px 0;">`;
@@ -1154,11 +1138,11 @@ function exportSetsToJson() {
         currentSet: currentSet,
         savedSets: savedSets,
         libraryTracks: libraryTracks,
-        version: "4.0",
+        version: "5.0",
         exportedAt: new Date().toISOString()
     }, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    const exportFileDefaultName = `setlist_timer_export_v4.json`;
+    const exportFileDefaultName = `setlist_timer_export_v5.json`;
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
