@@ -9,161 +9,231 @@
 </head>
 <body>
 
-    <!-- Header -->
-    <header>
-        <div class="logo-container">
-            <span class="logo-icon">⏱️</span>
-            <span class="logo-text">SetList Timer</span>
-        </div>
-        <div class="header-actions">
-            <button id="print-pdf-btn" class="btn btn-primary" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);" title="Imprimer la setlist en PDF">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-                Imprimer PDF
-            </button>
-            <button id="load-demo-btn" class="btn btn-secondary" title="Charger un set de démonstration">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                Démo
-            </button>
-            <button id="reset-set-btn" class="btn btn-danger" title="Vider le set actuel">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                Vider
-            </button>
-        </div>
-    </header>
-
-    <!-- Main Layout -->
-    <main>
-        <!-- Left Side: Song Library -->
-        <section class="panel">
-            <div class="sidebar-header">
-                <h2 class="sidebar-title">Bibliothèque</h2>
-            </div>
-            <div class="input-group" style="margin-top: 0.5rem;">
-                <input type="text" id="library-search" class="input-field" placeholder="Rechercher un morceau..." style="padding: 0.6rem 0.8rem;">
-            </div>
-            <div id="library-list" class="sets-list" style="max-height: 480px; overflow-y: auto; margin-top: 0.5rem;">
-                <!-- Loaded dynamically -->
-                <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem;">
-                    La bibliothèque est vide.
-                </div>
-            </div>
-        </section>
-
-        <!-- Center: Main Calculator and Tracklist -->
-        <section class="panel timer-hero">
-            <div class="timer-header">
-                <input type="text" id="current-set-title" class="set-title-input" value="Mon Set Mix" placeholder="Nommez votre set..." title="Modifier le nom du set">
-                <div id="track-count-badge" class="track-counter">0 morceaux</div>
-            </div>
-            
-            <div class="timer-display">
-                <div id="timer-digits" class="timer-digits">00:00:00</div>
-                <div class="timer-label">Durée Totale</div>
+    <!-- ===== LOGIN SCREEN ===== -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-card">
+            <div class="login-logo">
+                <span class="login-logo-icon">⏱️</span>
+                <h1 class="login-title">SetList Timer</h1>
+                <p class="login-subtitle">Connectez-vous pour accéder à votre setlist</p>
             </div>
 
-            <!-- Form to Add Track (Saves to Library) -->
-            <form id="add-track-form" class="add-track-section" onsubmit="return false;">
-                <div class="form-row" style="grid-template-columns: 2fr 1.2fr 0.8fr; gap: 0.75rem;">
-                    <div class="input-group">
-                        <label for="track-title" class="input-label">Titre du morceau</label>
-                        <input type="text" id="track-title" class="input-field" placeholder="Ex: Starlight" required>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">Durée</label>
-                        <div style="display: flex; gap: 0.25rem; align-items: center;">
-                            <select id="track-duration-min" class="input-field" style="padding: 0.68rem 0.5rem; flex: 1;" title="Minutes"></select>
-                            <span style="color: var(--text-secondary); font-weight: bold;">:</span>
-                            <select id="track-duration-sec" class="input-field" style="padding: 0.68rem 0.5rem; flex: 1;" title="Secondes"></select>
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label for="track-capo" class="input-label">Capo</label>
-                        <input type="text" id="track-capo" class="input-field" placeholder="Ex: 2">
-                    </div>
+            <div id="login-error" class="login-error hidden"></div>
+
+            <form id="login-form" class="login-form">
+                <div class="input-group">
+                    <label for="login-email" class="input-label">Email du groupe</label>
+                    <input type="email" id="login-email" class="input-field" placeholder="groupe@email.com" required autocomplete="email">
                 </div>
-                <div class="form-row" style="grid-template-columns: 1.2fr 1fr 1.5fr; gap: 0.75rem; margin-top: 0.25rem;">
-                    <button type="submit" class="btn btn-primary" id="add-track-btn" style="justify-content: center; padding: 0.5rem 1rem;" title="Créer et ajouter le morceau dans la bibliothèque">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        + Bibliothèque
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="add-separator-btn" title="Ajouter une ligne de séparation" style="justify-content: center; padding: 0.5rem 1rem;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                        + Séparateur
-                    </button>
-                    <div style="display: flex; gap: 0.25rem; align-items: stretch;">
-                        <select id="tuning-select" class="input-field" style="padding: 0.5rem; font-size: 0.85rem; flex: 1.2; height: 100%;">
-                            <option value="banjo">Banjo 🪕</option>
-                            <option value="guitar">Guitare 🎸</option>
-                            <option value="mandolin">Mandoline 🪕</option>
-                            <option value="bass">Basse 🎸</option>
-                            <option value="violin">Violon 🎻</option>
-                        </select>
-                        <button type="button" class="btn btn-secondary" id="add-tuning-btn" style="padding: 0.5rem; justify-content: center; flex: 1;" title="Ajouter un temps d'accordage">
-                            + Acc.
-                        </button>
-                    </div>
+                <div class="input-group">
+                    <label for="login-password" class="input-label">Mot de passe</label>
+                    <input type="password" id="login-password" class="input-field" placeholder="••••••••" required autocomplete="current-password">
                 </div>
+                <button type="submit" id="login-btn" class="btn btn-primary login-submit-btn">
+                    <span id="login-btn-text">Se connecter</span>
+                    <span id="login-spinner" class="spinner hidden"></span>
+                </button>
             </form>
 
-            <hr style="border: 0; border-top: 1px solid var(--panel-border); margin: 0.5rem 0;">
+            <div class="login-divider"><span>ou</span></div>
 
-            <!-- Track List -->
-            <div id="tracklist" class="tracklist-container">
-                <!-- Empty State -->
-                <div class="empty-state">
-                    <span class="empty-state-icon">🎵</span>
-                    <p>Aucun morceau dans ce set pour le moment.</p>
-                    <p style="font-size: 0.85rem; color: var(--text-secondary);">Remplissez le formulaire ci-dessus ou chargez la démo pour commencer !</p>
+            <p class="login-register-hint">Première fois ? <button id="show-register-btn" class="link-btn">Créer un compte</button></p>
+
+            <!-- Register Panel (hidden by default) -->
+            <form id="register-form" class="login-form hidden">
+                <div class="input-group">
+                    <label for="register-group-name" class="input-label">Nom du groupe</label>
+                    <input type="text" id="register-group-name" class="input-field" placeholder="Ex: Les Rustines" required>
                 </div>
-            </div>
-        </section>
-
-        <!-- Right Side: Saved Sets Manager -->
-        <section class="panel">
-            <div class="sidebar-header">
-                <h2 class="sidebar-title">Sets Sauvegardés</h2>
-                <button id="save-current-set-btn" class="btn btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" title="Sauvegarder le set actuel">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
-                    Sauver
-                </button>
-            </div>
-
-            <!-- List of Saved Sets -->
-            <div id="saved-sets-list" class="sets-list">
-                <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem;">
-                    Aucun set sauvegardé localement.
+                <div class="input-group">
+                    <label for="register-email" class="input-label">Email</label>
+                    <input type="email" id="register-email" class="input-field" placeholder="groupe@email.com" required autocomplete="email">
                 </div>
-            </div>
-
-            <!-- Import/Export section -->
-            <div class="import-export-section">
-                <button id="export-sets-btn" class="btn btn-secondary" style="justify-content: center; width: 100%;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
-                    Exporter mes sets (JSON)
+                <div class="input-group">
+                    <label for="register-password" class="input-label">Mot de passe (min. 6 caractères)</label>
+                    <input type="password" id="register-password" class="input-field" placeholder="••••••••" required minlength="6" autocomplete="new-password">
+                </div>
+                <button type="submit" id="register-btn" class="btn btn-primary login-submit-btn">
+                    <span id="register-btn-text">Créer le compte</span>
+                    <span id="register-spinner" class="spinner hidden"></span>
                 </button>
-                <button id="trigger-import-btn" class="btn btn-secondary" style="justify-content: center; width: 100%;">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Importer un fichier (.json)
-                </button>
-                <input type="file" id="import-file-input" class="hidden-file-input" accept=".json">
-            </div>
-        </section>
-    </main>
-
-    <!-- Modal: Save Set -->
-    <div id="save-modal" class="modal">
-        <div class="modal-content">
-            <h3 class="modal-title">Sauvegarder le Set</h3>
-            <div class="input-group">
-                <label for="save-set-name" class="input-label">Nom de la sauvegarde</label>
-                <input type="text" id="save-set-name" class="input-field" placeholder="Ex: Live Tour 2026 - Partie 1">
-            </div>
-            <div class="modal-actions">
-                <button id="cancel-save-btn" class="btn btn-secondary">Annuler</button>
-                <button id="confirm-save-btn" class="btn btn-primary">Confirmer</button>
-            </div>
+                <p style="text-align:center; margin-top: 0.5rem;"><button id="show-login-btn" class="link-btn">← Retour à la connexion</button></p>
+            </form>
         </div>
     </div>
+
+    <!-- ===== MAIN APP (hidden until logged in) ===== -->
+    <div id="app" class="app-hidden">
+
+        <!-- Header -->
+        <header>
+            <div class="logo-container">
+                <span class="logo-icon">⏱️</span>
+                <span class="logo-text">SetList Timer</span>
+            </div>
+            <div class="header-actions">
+                <div id="user-badge" class="user-badge" title="Compte connecté">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    <span id="user-badge-name">Groupe</span>
+                </div>
+                <button id="print-pdf-btn" class="btn btn-primary" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);" title="Imprimer la setlist en PDF">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                    Imprimer PDF
+                </button>
+                <button id="load-demo-btn" class="btn btn-secondary" title="Charger un set de démonstration">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    Démo
+                </button>
+                <button id="reset-set-btn" class="btn btn-danger" title="Vider le set actuel">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    Vider
+                </button>
+                <button id="logout-btn" class="btn btn-secondary" title="Se déconnecter" style="padding: 0.5rem 0.75rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                    Déconnexion
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main>
+            <!-- Left Side: Song Library -->
+            <section class="panel">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">Bibliothèque</h2>
+                </div>
+                <div class="input-group" style="margin-top: 0.5rem;">
+                    <input type="text" id="library-search" class="input-field" placeholder="Rechercher un morceau..." style="padding: 0.6rem 0.8rem;">
+                </div>
+                <div id="library-list" class="sets-list" style="max-height: 480px; overflow-y: auto; margin-top: 0.5rem;">
+                    <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem;">
+                        Chargement de la bibliothèque...
+                    </div>
+                </div>
+            </section>
+
+            <!-- Center: Main Calculator and Tracklist -->
+            <section class="panel timer-hero">
+                <div class="timer-header">
+                    <input type="text" id="current-set-title" class="set-title-input" value="Mon Set Mix" placeholder="Nommez votre set..." title="Modifier le nom du set">
+                    <div id="track-count-badge" class="track-counter">0 morceaux</div>
+                </div>
+                
+                <div class="timer-display">
+                    <div id="timer-digits" class="timer-digits">00:00:00</div>
+                    <div class="timer-label">Durée Totale</div>
+                </div>
+
+                <!-- Form to Add Track (Saves to Library) -->
+                <form id="add-track-form" class="add-track-section" onsubmit="return false;">
+                    <div class="form-row" style="grid-template-columns: 2fr 1.2fr 0.8fr; gap: 0.75rem;">
+                        <div class="input-group">
+                            <label for="track-title" class="input-label">Titre du morceau</label>
+                            <input type="text" id="track-title" class="input-field" placeholder="Ex: Starlight" required>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">Durée</label>
+                            <div style="display: flex; gap: 0.25rem; align-items: center;">
+                                <select id="track-duration-min" class="input-field" style="padding: 0.68rem 0.5rem; flex: 1;" title="Minutes"></select>
+                                <span style="color: var(--text-secondary); font-weight: bold;">:</span>
+                                <select id="track-duration-sec" class="input-field" style="padding: 0.68rem 0.5rem; flex: 1;" title="Secondes"></select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label for="track-capo" class="input-label">Capo</label>
+                            <input type="text" id="track-capo" class="input-field" placeholder="Ex: 2">
+                        </div>
+                    </div>
+                    <div class="form-row" style="grid-template-columns: 1.2fr 1fr 1.5fr; gap: 0.75rem; margin-top: 0.25rem;">
+                        <button type="submit" class="btn btn-primary" id="add-track-btn" style="justify-content: center; padding: 0.5rem 1rem;" title="Créer et ajouter le morceau dans la bibliothèque">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            + Bibliothèque
+                        </button>
+                        <button type="button" class="btn btn-secondary" id="add-separator-btn" title="Ajouter une ligne de séparation" style="justify-content: center; padding: 0.5rem 1rem;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                            + Séparateur
+                        </button>
+                        <div style="display: flex; gap: 0.25rem; align-items: stretch;">
+                            <select id="tuning-select" class="input-field" style="padding: 0.5rem; font-size: 0.85rem; flex: 1.2; height: 100%;">
+                                <option value="banjo">Banjo 🪕</option>
+                                <option value="guitar">Guitare 🎸</option>
+                                <option value="mandolin">Mandoline 🪕</option>
+                                <option value="bass">Basse 🎸</option>
+                                <option value="violin">Violon 🎻</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary" id="add-tuning-btn" style="padding: 0.5rem; justify-content: center; flex: 1;" title="Ajouter un temps d'accordage">
+                                + Acc.
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <hr style="border: 0; border-top: 1px solid var(--panel-border); margin: 0.5rem 0;">
+
+                <!-- Track List -->
+                <div id="tracklist" class="tracklist-container">
+                    <div class="empty-state">
+                        <span class="empty-state-icon">🎵</span>
+                        <p>Aucun morceau dans ce set pour le moment.</p>
+                        <p style="font-size: 0.85rem; color: var(--text-secondary);">Glissez des morceaux depuis la bibliothèque ou chargez la démo pour commencer !</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Side: Saved Sets Manager -->
+            <section class="panel">
+                <div class="sidebar-header">
+                    <h2 class="sidebar-title">Sets Sauvegardés</h2>
+                    <button id="save-current-set-btn" class="btn btn-primary" style="padding: 0.5rem 0.75rem; font-size: 0.85rem;" title="Sauvegarder le set actuel">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                        Sauver
+                    </button>
+                </div>
+
+                <!-- Sync status indicator -->
+                <div id="sync-status" class="sync-status">
+                    <span id="sync-icon">☁️</span>
+                    <span id="sync-text">Synchronisé</span>
+                </div>
+
+                <!-- List of Saved Sets -->
+                <div id="saved-sets-list" class="sets-list">
+                    <div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem;">
+                        Chargement des sets...
+                    </div>
+                </div>
+
+                <!-- Import/Export section -->
+                <div class="import-export-section">
+                    <button id="export-sets-btn" class="btn btn-secondary" style="justify-content: center; width: 100%;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                        Exporter mes sets (JSON)
+                    </button>
+                    <button id="trigger-import-btn" class="btn btn-secondary" style="justify-content: center; width: 100%;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Importer un fichier (.json)
+                    </button>
+                    <input type="file" id="import-file-input" class="hidden-file-input" accept=".json">
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal: Save Set -->
+        <div id="save-modal" class="modal">
+            <div class="modal-content">
+                <h3 class="modal-title">Sauvegarder le Set</h3>
+                <div class="input-group">
+                    <label for="save-set-name" class="input-label">Nom de la sauvegarde</label>
+                    <input type="text" id="save-set-name" class="input-field" placeholder="Ex: Live Tour 2026 - Partie 1">
+                </div>
+                <div class="modal-actions">
+                    <button id="cancel-save-btn" class="btn btn-secondary">Annuler</button>
+                    <button id="confirm-save-btn" class="btn btn-primary">Confirmer</button>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- end #app -->
 
     <!-- Toast container for notifications -->
     <div id="toast-container" class="toast-container"></div>
@@ -171,6 +241,6 @@
     <!-- Printable Area (Hidden by default, visible during printing) -->
     <div id="printable-setlist" class="printable-area"></div>
 
-    <script src="app.js"></script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
