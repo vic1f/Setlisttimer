@@ -53,6 +53,28 @@ const INSTRUMENT_SVGS = {
 function getInstrumentSvg(type) { return INSTRUMENT_SVGS[type] || ''; }
 
 // ============================================================
+// ENERGY LEVELS
+// ============================================================
+const ENERGY_LEVELS = {
+    calme:     { color: "#10b981", label: "Calme" },
+    rythme:    { color: "#f59e0b", label: "Rythmé" },
+    dynamique: { color: "#ef4444", label: "Dynamique" }
+};
+
+function energyDot(energy) {
+    const lvl = ENERGY_LEVELS[energy];
+    if (!lvl) return "";
+    return `<span class="energy-dot" style="background:${lvl.color};" title="Énergie : ${lvl.label}"></span>`;
+}
+
+function energySelectHtml(id, selected) {
+    const opts = Object.entries(ENERGY_LEVELS)
+        .map(([key, lvl]) => `<option value="${key}" ${selected === key ? 'selected' : ''}>${lvl.label}</option>`)
+        .join('');
+    return `<select id="${id}" class="track-edit-input"><option value="">Énergie : —</option>${opts}</select>`;
+}
+
+// ============================================================
 // STATE
 // ============================================================
 let currentSet = { title: "Mon Set Mix", tracks: [] };
@@ -335,14 +357,14 @@ function showToast(message, type = 'success') {
 // ============================================================
 // LIBRARY MANAGEMENT
 // ============================================================
-async function addTrackToLibrary(title, duration, capo) {
+async function addTrackToLibrary(title, duration, capo, energy = "") {
     const cleanTitle = title.trim();
     const exists = libraryTracks.some(t => t.title.toLowerCase() === cleanTitle.toLowerCase());
     if (exists) {
         showToast(`"${cleanTitle}" existe déjà dans la bibliothèque`, "error");
         return;
     }
-    const track = { title: cleanTitle, duration, capo: capo ? capo.trim() : "" };
+    const track = { title: cleanTitle, duration, capo: capo ? capo.trim() : "", energy: energy || "" };
     try {
         await saveTrackToFirestore(track);
         showToast(`"${cleanTitle}" ajouté à la bibliothèque ☁️`);
@@ -377,14 +399,14 @@ function renderLibrary(filterQuery = "") {
         item.dataset.title = track.title;
         item.addEventListener('dragstart', (e) => {
             e.dataTransfer.effectAllowed = 'copy';
-            e.dataTransfer.setData('application/json', JSON.stringify({ source: 'library', title: track.title, duration: track.duration, capo: track.capo }));
+            e.dataTransfer.setData('application/json', JSON.stringify({ source: 'library', title: track.title, duration: track.duration, capo: track.capo, energy: track.energy || "" }));
             item.style.opacity = '0.5';
         });
         item.addEventListener('dragend', () => { item.style.opacity = '1'; });
         const capoBadge = track.capo ? ` <span style="font-size:0.75rem;background:rgba(99,102,241,0.15);color:var(--accent-indigo);padding:2px 5px;border-radius:4px;">Capo ${track.capo}</span>` : '';
         item.innerHTML = `
             <div class="set-item-info" style="flex:1;min-width:0;pointer-events:none;">
-                <span class="set-item-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(track.title)}">${escapeHtml(track.title)}</span>
+                <span class="set-item-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escapeHtml(track.title)}">${energyDot(track.energy)}${escapeHtml(track.title)}</span>
                 <span class="set-item-meta">${formatTrackDuration(track.duration)}${capoBadge}</span>
             </div>
             <div style="display:flex;gap:0.25rem;">
@@ -402,11 +424,12 @@ function renderLibrary(filterQuery = "") {
 // ============================================================
 // SETLIST MANAGEMENT
 // ============================================================
-function addTrackToSetlist(title, duration, capo, atIndex = null) {
+function addTrackToSetlist(title, duration, capo, energy = "", atIndex = null) {
     const newTrack = {
         id: 'track_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
         title, duration,
         capo: capo ? capo.toString().trim() : "",
+        energy: energy || "",
         enabled: true
     };
     if (atIndex !== null) currentSet.tracks.splice(atIndex, 0, newTrack);
@@ -449,6 +472,7 @@ function updateTrackInline(id, fields) {
     if (!track) return;
     if (fields.title) track.title = fields.title.trim();
     if (fields.capo !== undefined) track.capo = fields.capo.trim();
+    if (fields.energy !== undefined) track.energy = fields.energy;
     if (fields.durationStr) { const s = parseTimeToSeconds(fields.durationStr); if (s > 0) track.duration = s; }
     persistCurrentWork(); renderTracklist(); updateTotalDuration(); showToast("Morceau mis à jour");
 }
@@ -508,7 +532,8 @@ function renderTracklist() {
                     <input type="text" id="edit-title-${track.id}" class="track-edit-input" value="${escapeHtml(track.title)}" placeholder="Titre">
                     <div style="display:flex;gap:0.5rem;">
                         <input type="text" id="edit-duration-${track.id}" class="track-edit-input" value="${formatTrackDuration(track.duration)}" placeholder="Durée (ex: 3:30)" style="flex:1;">
-                        <input type="text" id="edit-capo-${track.id}" class="track-edit-input" value="${escapeHtml(track.capo)}" placeholder="Capo" style="flex:0.8;">
+                        <input type="text" id="edit-capo-${track.id}" class="track-edit-input" value="${escapeHtml(track.capo)}" placeholder="Capo" style="flex:0.6;">
+                        ${energySelectHtml(`edit-energy-${track.id}`, track.energy)}
                     </div>
                 </div>
                 <div class="track-actions">
@@ -520,7 +545,7 @@ function renderTracklist() {
                 <div class="track-drag"><div class="drag-dot-row"><div class="drag-dot"></div><div class="drag-dot"></div></div><div class="drag-dot-row"><div class="drag-dot"></div><div class="drag-dot"></div></div><div class="drag-dot-row"><div class="drag-dot"></div><div class="drag-dot"></div></div></div>
                 <label class="checkbox-container"><input type="checkbox" class="track-toggle" data-id="${track.id}" ${track.enabled ? 'checked' : ''}><span class="checkmark"></span></label>
                 <div class="track-details">
-                    <div class="track-title" style="display:flex;align-items:center;gap:0.25rem;"><span>${escapeHtml(track.title)}</span>${capoBadge}</div>
+                    <div class="track-title" style="display:flex;align-items:center;gap:0.25rem;">${energyDot(track.energy)}<span>${escapeHtml(track.title)}</span>${capoBadge}</div>
                 </div>
                 <div class="track-duration-badge">${formatTrackDuration(track.duration)}</div>
                 <div class="track-actions">
@@ -588,7 +613,7 @@ function setupDragAndDropEvents(el) {
         try { data = JSON.parse(e.dataTransfer.getData('application/json') || '{}'); } catch { return; }
         const toIndex = parseInt(el.dataset.index, 10);
         if (data.source === 'library') {
-            addTrackToSetlist(data.title, data.duration, data.capo, toIndex);
+            addTrackToSetlist(data.title, data.duration, data.capo, data.energy, toIndex);
         } else if (data.source === 'setlist') {
             const fromIndex = parseInt(data.index, 10);
             if (fromIndex !== toIndex) {
@@ -618,7 +643,8 @@ function initEventListeners() {
         const mins = parseInt(document.getElementById("track-duration-min").value, 10) || 0;
         const secs = parseInt(document.getElementById("track-duration-sec").value, 10) || 0;
         const capoVal = document.getElementById("track-capo").value;
-        await addTrackToLibrary(titleVal, (mins * 60) + secs, capoVal);
+        const energyVal = document.getElementById("track-energy").value;
+        await addTrackToLibrary(titleVal, (mins * 60) + secs, capoVal, energyVal);
         e.target.reset();
         document.getElementById("track-title").focus();
     });
@@ -637,7 +663,7 @@ function initEventListeners() {
         if (e.target === tracklist || tracklist.querySelector('.empty-state')) {
             let data = {};
             try { data = JSON.parse(e.dataTransfer.getData('application/json') || '{}'); } catch { return; }
-            if (data.source === 'library') addTrackToSetlist(data.title, data.duration, data.capo);
+            if (data.source === 'library') addTrackToSetlist(data.title, data.duration, data.capo, data.energy);
         }
     });
 
@@ -647,7 +673,7 @@ function initEventListeners() {
         const deleteBtn = e.target.closest(".delete-from-lib-btn");
         if (addBtn) {
             const song = libraryTracks.find(t => t.title.toLowerCase() === addBtn.dataset.title.toLowerCase());
-            if (song) addTrackToSetlist(song.title, song.duration, song.capo);
+            if (song) addTrackToSetlist(song.title, song.duration, song.capo, song.energy);
         } else if (deleteBtn) {
             if (confirm(`Supprimer "${deleteBtn.dataset.title}" de la bibliothèque ?`)) {
                 deleteTrackFromLibrary(deleteBtn.dataset.title);
@@ -673,7 +699,8 @@ function initEventListeners() {
             updateTrackInline(id, {
                 title: document.getElementById(`edit-title-${id}`).value,
                 durationStr: document.getElementById(`edit-duration-${id}`).value,
-                capo: document.getElementById(`edit-capo-${id}`).value
+                capo: document.getElementById(`edit-capo-${id}`).value,
+                energy: document.getElementById(`edit-energy-${id}`).value
             });
         }
         else if (cancelEditBtn) { editingTrackId = null; renderTracklist(); }
@@ -833,7 +860,8 @@ function generateAndPrintPDF() {
             });
             pendingInstruments = [];
             let title = track.title + (track.capo ? ` (capo ${track.capo})` : '');
-            html += `<div class="print-item-row">${left}<span class="print-track-name">${escapeHtml(title)}</span>${right}</div>`;
+            const dot = track.energy && ENERGY_LEVELS[track.energy] ? `<span class="print-energy-dot" style="background:${ENERGY_LEVELS[track.energy].color};"></span>` : '';
+            html += `<div class="print-item-row">${left}<span class="print-track-name">${dot}${escapeHtml(title)}</span>${right}</div>`;
         }
     });
     pendingInstruments.forEach(inst => {
@@ -866,7 +894,7 @@ async function importSetsFromJson(event) {
             const data = JSON.parse(e.target.result);
             if (data.libraryTracks) {
                 for (const t of data.libraryTracks) {
-                    await addTrackToLibrary(t.title, t.duration, t.capo);
+                    await addTrackToLibrary(t.title, t.duration, t.capo, t.energy);
                 }
             }
             if (data.savedSets) {

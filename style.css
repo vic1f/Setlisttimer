@@ -959,6 +959,18 @@ main {
     filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.4));
 }
 
+/* Energy Dot (Calme / Rythmé / Dynamique) */
+.energy-dot {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    margin-right: 0.4rem;
+    flex-shrink: 0;
+    vertical-align: middle;
+    box-shadow: 0 0 6px currentColor;
+}
+
 /* Separator Item Styling */
 .track-card.separator-card {
     background: transparent;
@@ -1047,6 +1059,17 @@ main {
     .print-track-name {
         text-align: center;
         font-weight: 700;
+    }
+
+    .print-energy-dot {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        margin-right: 12px;
+        vertical-align: middle;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
     }
 
     .print-instrument {

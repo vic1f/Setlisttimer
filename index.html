@@ -126,7 +126,7 @@
 
                 <!-- Form to Add Track (Saves to Library) -->
                 <form id="add-track-form" class="add-track-section" onsubmit="return false;">
-                    <div class="form-row" style="grid-template-columns: 2fr 1.2fr 0.8fr; gap: 0.75rem;">
+                    <div class="form-row" style="grid-template-columns: 2fr 1.1fr 0.6fr 1fr; gap: 0.75rem;">
                         <div class="input-group">
                             <label for="track-title" class="input-label">Titre du morceau</label>
                             <input type="text" id="track-title" class="input-field" placeholder="Ex: Starlight" required>
@@ -142,6 +142,15 @@
                         <div class="input-group">
                             <label for="track-capo" class="input-label">Capo</label>
                             <input type="text" id="track-capo" class="input-field" placeholder="Ex: 2">
+                        </div>
+                        <div class="input-group">
+                            <label for="track-energy" class="input-label">Énergie</label>
+                            <select id="track-energy" class="input-field" style="padding: 0.68rem 0.5rem;" title="Niveau d'énergie du morceau">
+                                <option value="">—</option>
+                                <option value="calme">🟢 Calme</option>
+                                <option value="rythme">🟠 Rythmé</option>
+                                <option value="dynamique">🔴 Dynamique</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-row" style="grid-template-columns: 1.2fr 1fr 1.5fr; gap: 0.75rem; margin-top: 0.25rem;">
